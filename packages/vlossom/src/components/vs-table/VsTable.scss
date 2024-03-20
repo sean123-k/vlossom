@@ -2,7 +2,7 @@
 
 .vs-table .table-wrap {
     width: 100%;
-    overflow-x: auto;
+    overflow-x: hidden;
 
     table {
         min-width: 100%;
@@ -185,6 +185,9 @@
 
 @media screen and (max-width: 576px) {
     .vs-table .table-wrap {
+        display: flex;
+        justify-content: center;
+
         table thead {
             display: none;
         }
@@ -192,8 +195,9 @@
         table tbody tr {
             display: flex !important;
             flex-direction: column;
-            margin: 1rem 0 0 0;
+            margin: 1rem auto 0 auto;
             border: 1px solid var(--vs-line-color);
+            width: 65%;
 
             &:first-of-type {
                 margin-top: 0;
