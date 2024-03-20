@@ -2,7 +2,7 @@
 
 .vs-table .table-wrap {
     width: 100%;
-    overflow-x: hidden;
+    overflow-x: auto;
 
     table {
         min-width: 100%;
@@ -179,85 +179,6 @@
     tbody tr {
         td {
             min-height: 3.2rem;
-        }
-    }
-}
-
-@media screen and (max-width: 576px) {
-    .vs-table .table-wrap {
-        display: flex;
-        justify-content: center;
-
-        table thead {
-            display: none;
-        }
-
-        table tbody tr {
-            display: flex !important;
-            flex-direction: column;
-            margin: 1rem auto 0 auto;
-            border: 1px solid var(--vs-line-color);
-            width: 65%;
-
-            &:first-of-type {
-                margin-top: 0;
-            }
-
-            td {
-                display: flex;
-                justify-content: space-between;
-                padding: 0.8rem 1.2rem !important;
-                border-top: 1px dashed var(--vs-line-color);
-
-                &::before {
-                    content: attr(data-label);
-                    color: var(--vs-comp-color);
-                    display: block;
-                    line-height: 3rem;
-                    margin-right: 1.8rem;
-                    font-size: 1.1rem;
-                    font-weight: 700;
-                }
-
-                &:first-child {
-                    border-top: none;
-                }
-
-                &.expandable-td,
-                &.expanded-row-content {
-                    min-height: auto;
-                    &::before {
-                        display: none;
-                    }
-                }
-                &.expanded-row-content {
-                    border-top: none;
-                }
-
-                &.expandable-td {
-                    button {
-                        flex: 1;
-                    }
-                }
-
-                &.expanded-row-content {
-                    display: flex !important;
-                    padding-top: 0;
-                    padding-bottom: 1.2rem;
-
-                    .expand-contents {
-                        flex: 1;
-                    }
-                }
-
-                .skeleton {
-                    height: 2.8rem;
-                }
-            }
-        }
-
-        .table-empty {
-            border-top: 1px solid var(--vs-grey-200);
         }
     }
 }
