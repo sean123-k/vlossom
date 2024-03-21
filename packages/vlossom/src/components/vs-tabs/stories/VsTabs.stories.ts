@@ -5,6 +5,7 @@ import VsContainer from '@/components/vs-container/VsContainer.vue';
 import { VsIcon } from '@/icons';
 
 import type { Meta, StoryObj } from '@storybook/vue3';
+import { SCROLL_BUTTONS } from '../types';
 
 const disabledArgTypes = numberArray(3, true);
 const tabs = [
@@ -36,12 +37,16 @@ const meta: Meta<typeof VsTabs> = {
         template: '<vs-tabs v-bind="args" />',
     }),
     tags: ['autodocs'],
+    args: {
+        tabs,
+    },
     argTypes: {
         colorScheme,
         disabled: disabledArgTypes,
-    },
-    args: {
-        tabs,
+        scrollButtons: {
+            control: 'select',
+            options: SCROLL_BUTTONS,
+        },
     },
 };
 
@@ -78,6 +83,16 @@ export const Dense: Story = {
 export const disabled: Story = {
     args: {
         disabled: [1],
+    },
+    parameters: {
+        chromatic: chromaticParameters.theme,
+    },
+};
+
+export const scrollable: Story = {
+    args: {
+        scrollable: true,
+        scrollButtons: 'always',
     },
     parameters: {
         chromatic: chromaticParameters.theme,

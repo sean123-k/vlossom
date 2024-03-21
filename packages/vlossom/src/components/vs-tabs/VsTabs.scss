@@ -2,15 +2,22 @@ $fontWeight: var(--vs-tabs-fontWeight, 400);
 
 .vs-tabs {
     overflow: hidden;
+    display: flex;
+    justify-content: space-around;
 
-    &.bottomLine {
-        border-bottom: 1px solid var(--vs-tabs-borderBottomColor, var(--vs-comp-border-color));
+    .scroll-button {
+        width: 5rem;
     }
 
     ul {
         align-items: center;
         display: inline-flex;
         list-style: none;
+        overflow: hidden;
+
+        &.bottomLine {
+            border-bottom: 1px solid var(--vs-tabs-borderBottomColor, var(--vs-comp-border-color));
+        }
 
         .tab {
             align-items: center;
@@ -27,6 +34,7 @@ $fontWeight: var(--vs-tabs-fontWeight, 400);
             text-align: center;
             transition: color 0.1s;
             width: var(--vs-tabs-tabWidth, auto);
+            min-width: fit-content;
 
             &:not(:last-child) {
                 margin-right: var(--vs-tabs-gap, 0.3rem);

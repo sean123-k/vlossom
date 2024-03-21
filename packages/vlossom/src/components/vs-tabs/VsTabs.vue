@@ -1,8 +1,17 @@
 <template>
     <vs-wrapper :width="width" :grid="grid">
-        <div :class="['vs-tabs', `vs-${computedColorScheme}`, { dense, bottomLine }]" :style="computedStyleSet">
-            <ul role="tablist">
-                <button type="button">temp left</button>
+        <div :class="['vs-tabs', `vs-${computedColorScheme}`, { dense }]" :style="computedStyleSet">
+            <button
+                v-if="showScrollButtons"
+                type="button"
+                class="scroll-button"
+                aria-label="scroll to the left"
+                :disabled="currentFocusedTab <= 0"
+                @click="scrollLeft"
+            >
+                <vs-icon icon="goPrev" size="1.2rem" />
+            </button>
+            <ul role="tablist" ref="tabsContainerRef" :class="{ bottomLine }">
                 <li
                     v-for="(tab, index) in tabs"
                     ref="tabRefs"
@@ -19,26 +28,37 @@
                         {{ tab }}
                     </slot>
                 </li>
-                <button type="button">temp right</button>
             </ul>
+            <button
+                v-if="showScrollButtons"
+                type="button"
+                class="scroll-button"
+                aria-label="scroll to the right"
+                :disabled="currentFocusedTab >= tabs.length - 1"
+                @click="scrollRight"
+            >
+                <vs-icon icon="goNext" size="1.2rem" />
+            </button>
         </div>
     </vs-wrapper>
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs, ref, watch, type Ref, type PropType } from 'vue';
+import { defineComponent, toRefs, ref, watch, onMounted, onUnmounted, type Ref, type PropType } from 'vue';
 import { useColorScheme, useStyleSet, getResponsiveProps } from '@/composables';
 import { VsComponent, type ColorScheme } from '@/declaration';
 import { objectUtil } from '@/utils/object';
 import { logUtil } from '@/utils/log';
 import VsWrapper from '@/components/vs-wrapper/VsWrapper.vue';
+import { VsIcon } from '@/icons';
 
 import type { VsTabsStyleSet, ScrollButton } from './types';
+import { computed } from 'vue';
 
 const name = VsComponent.VsTabs;
 export default defineComponent({
     name,
-    components: { VsWrapper },
+    components: { VsWrapper, VsIcon },
     props: {
         ...getResponsiveProps(),
         colorScheme: { type: String as PropType<ColorScheme> },
@@ -46,7 +66,7 @@ export default defineComponent({
         bottomLine: { type: Boolean, default: true },
         dense: { type: Boolean, default: false },
         disabled: { type: Array as PropType<number[]>, default: () => [] },
-        scrollable: { type: Boolean, default: false },
+        scrollable: { type: Boolean, default: true },
         scrollButtons: {
             type: String as PropType<ScrollButton>,
             default: '',
@@ -74,12 +94,15 @@ export default defineComponent({
     },
     emits: ['update:modelValue', 'change'],
     setup(props, { emit }) {
-        const { colorScheme, styleSet, disabled, tabs, modelValue } = toRefs(props);
+        const { colorScheme, styleSet, disabled, scrollable, scrollButtons, tabs, modelValue } = toRefs(props);
 
         const { computedColorScheme } = useColorScheme(name, colorScheme);
 
         const { computedStyleSet } = useStyleSet<VsTabsStyleSet>(name, styleSet);
 
+        const scrollCount = ref(1);
+
+        const tabsContainerRef: Ref<HTMLElement | null> = ref(null);
         const tabRefs: Ref<HTMLElement[]> = ref([]);
 
         function isSelected(index: number) {
@@ -91,9 +114,11 @@ export default defineComponent({
         }
 
         const selectedIdx = ref(modelValue.value);
+        const currentFocusedTab = ref(selectedIdx.value);
+        const totalLength = computed(() => tabs.value.length);
 
         function selectTab(index: number) {
-            if (index < 0 || index > tabs.value.length - 1) {
+            if (index < 0 || index > totalLength.value - 1) {
                 selectedIdx.value = 0;
                 return;
             }
@@ -109,6 +134,8 @@ export default defineComponent({
 
         watch(selectedIdx, (index: number) => {
             tabRefs.value[index]?.focus();
+            scrollTo(index);
+
             if (index !== modelValue.value) {
                 emit('update:modelValue', index);
                 emit('change', index);
@@ -124,9 +151,8 @@ export default defineComponent({
         );
 
         function findNextActivedIndex(startIndex: number): number {
-            const length = tabs.value.length;
-            for (let i = startIndex; i < length + startIndex; i++) {
-                const index = i % length;
+            for (let i = startIndex; i < totalLength.value + startIndex; i++) {
+                const index = i % totalLength.value;
                 if (!isDisabled(index)) {
                     return index;
                 }
@@ -135,9 +161,8 @@ export default defineComponent({
         }
 
         function findPreviousActivedIndex(startIndex: number): number {
-            const length = tabs.value.length;
-            for (let i = startIndex; i > startIndex - length; i--) {
-                const index = (i + length) % length;
+            for (let i = startIndex; i > startIndex - totalLength.value; i--) {
+                const index = (i + totalLength.value) % totalLength.value;
                 if (!isDisabled(index)) {
                     return index;
                 }
@@ -146,7 +171,6 @@ export default defineComponent({
         }
 
         function handleKeydown(event: KeyboardEvent) {
-            const length = tabs.value.length;
             let targetIndex = selectedIdx.value;
 
             switch (event.code) {
@@ -160,7 +184,7 @@ export default defineComponent({
                     targetIndex = findNextActivedIndex(0);
                     break;
                 case 'End':
-                    targetIndex = findPreviousActivedIndex(length - 1);
+                    targetIndex = findPreviousActivedIndex(totalLength.value - 1);
                     break;
                 default:
                     return;
@@ -170,6 +194,77 @@ export default defineComponent({
             selectTab(targetIndex);
         }
 
+        function calculateScrollCount() {
+            const tabContainerWidth = tabsContainerRef.value?.clientWidth;
+            if (!tabContainerWidth) {
+                return 0;
+            }
+
+            let visibleTabsCount = 0;
+            let accumulatedWidth = 0;
+            tabRefs.value.some((tabRef) => {
+                accumulatedWidth += tabRef.offsetWidth;
+                if (accumulatedWidth <= tabContainerWidth) {
+                    visibleTabsCount++;
+                    return false;
+                }
+                return true;
+            });
+
+            scrollCount.value = visibleTabsCount;
+        }
+        const showScrollButtons = computed(() => {
+            if (!scrollable.value || scrollCount.value === totalLength.value) {
+                return false;
+            }
+
+            if (scrollButtons.value === 'mobile') {
+                return window.innerWidth <= 768;
+            }
+
+            return true;
+        });
+
+        function scrollTo(index: number, position: ScrollLogicalPosition = 'center') {
+            let targetIndex = index;
+            if (index < 0) {
+                targetIndex = 0;
+            }
+            if (index > totalLength.value - 1) {
+                targetIndex = totalLength.value - 1;
+            }
+
+            tabRefs.value[targetIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: position });
+            currentFocusedTab.value = targetIndex;
+        }
+
+        function scrollLeft() {
+            const targetIndex = Math.max(0, currentFocusedTab.value - scrollCount.value);
+            if (targetIndex <= 1) {
+                scrollTo(targetIndex, 'nearest');
+            } else {
+                scrollTo(targetIndex);
+            }
+        }
+
+        function scrollRight() {
+            const targetIndex = Math.min(totalLength.value, currentFocusedTab.value + scrollCount.value);
+            if (targetIndex > totalLength.value - 1) {
+                scrollTo(targetIndex, 'nearest');
+            } else {
+                scrollTo(targetIndex);
+            }
+        }
+
+        onMounted(() => {
+            calculateScrollCount();
+            window.addEventListener('resize', calculateScrollCount);
+        });
+
+        onUnmounted(() => {
+            window.removeEventListener('resize', calculateScrollCount);
+        });
+
         return {
             computedColorScheme,
             computedStyleSet,
@@ -177,8 +272,13 @@ export default defineComponent({
             isDisabled,
             selectedIdx,
             selectTab,
+            tabsContainerRef,
             tabRefs,
             handleKeydown,
+            showScrollButtons,
+            currentFocusedTab,
+            scrollLeft,
+            scrollRight,
         };
     },
 });

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import VsTabs from '../VsTabs.vue';
 import { mockConsoleError } from '@/test/setup';
@@ -7,6 +7,16 @@ function mountComponent() {
     return mount(VsTabs);
 }
 describe('vs-tabs', () => {
+    const originalScrollIntoView = window.HTMLElement.prototype.scrollIntoView;
+
+    beforeEach(() => {
+        window.HTMLElement.prototype.scrollIntoView = vi.fn().mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+    });
+
     describe('props & slots', () => {
         it('props tabs에 string 배열을 전달하면, 그 길이만큼 tab이 생기고 배열의 각 요소가 tab의 이름으로 지정된다', () => {
             // given

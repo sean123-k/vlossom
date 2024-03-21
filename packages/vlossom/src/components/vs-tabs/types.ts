@@ -10,6 +10,6 @@ export interface VsTabsStyleSet {
     tabWidth?: string;
 }
 
-export const SCROLL_BUTTONS = ['always', 'mobie'] as const;
+export const SCROLL_BUTTONS = ['always', 'mobile'] as const;
 
 export type ScrollButton = (typeof SCROLL_BUTTONS)[number];
