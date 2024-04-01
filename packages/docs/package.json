@@ -12,6 +12,7 @@
         "lint": "eslint --ext .js,.ts,vue --ignore-path ../../.gitignore ."
     },
     "dependencies": {
+        "vlossom": "^1.0.0-alpha.1",
         "vue": "^3.4.8",
         "vue-router": "^4.2.5"
     },

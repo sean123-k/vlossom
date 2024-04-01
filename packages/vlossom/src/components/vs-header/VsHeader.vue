@@ -1,5 +1,7 @@
 <template>
+    <!--     // TODO class 추가 -->
     <vs-bar-node
+        :class="['vs-header', `vs-header-${position}`]"
         :color-scheme="computedColorScheme"
         :style-set="{ ...defaultInsetStyle, ...computedStyleSet }"
         :height="height"
@@ -28,7 +30,7 @@ export default defineComponent({
         colorScheme: { type: String as PropType<ColorScheme> },
         styleSet: { type: [String, Object] as PropType<string | VsHeaderStyleSet> },
         height: { type: String, default: '' },
-        position: { type: String as PropType<CssPosition>, default: '' },
+        position: { type: String as PropType<CssPosition>, default: 'static' },
         primary: { type: Boolean, default: false },
         verticalAlign: { type: String as PropType<Align>, default: '' },
     },
