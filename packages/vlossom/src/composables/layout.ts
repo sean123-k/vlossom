@@ -95,7 +95,9 @@ export const makeLayoutItemProps = propsFactory(
 export function useLayout() {
     const layout = inject(VuetifyLayoutKey);
 
-    if (!layout) throw new Error('[Vuetify] Could not find injected layout');
+    if (!layout) {
+        throw new Error('[Vuetify] Could not find injected layout');
+    }
 
     return {
         getLayoutItem: layout.getLayoutItem,
@@ -116,7 +118,9 @@ export function useLayoutItem(options: {
 }) {
     const layout = inject(VuetifyLayoutKey);
 
-    if (!layout) throw new Error('[Vuetify] Could not find injected layout');
+    if (!layout) {
+        throw new Error('[Vuetify] Could not find injected layout');
+    }
 
     const id = options.id ?? `layout-item-${getUid()}`;
 
@@ -151,7 +155,9 @@ const generateLayers = (
         const position = positions.get(id);
         const amount = layoutSizes.get(id);
         const active = activeItems.get(id);
-        if (!position || !amount || !active) continue;
+        if (!position || !amount || !active) {
+            continue;
+        }
 
         const layer = {
             ...previousLayer,
@@ -186,14 +192,18 @@ export function createLayout(props: { overlaps?: string[]; fullHeight?: boolean 
         const overlaps = props.overlaps ?? [];
         for (const overlap of overlaps.filter((item) => item.includes(':'))) {
             const [top, bottom] = overlap.split(':');
-            if (!registered.value.includes(top) || !registered.value.includes(bottom)) continue;
+            if (!registered.value.includes(top) || !registered.value.includes(bottom)) {
+                continue;
+            }
 
             const topPosition = positions.get(top);
             const bottomPosition = positions.get(bottom);
             const topAmount = layoutSizes.get(top);
             const bottomAmount = layoutSizes.get(bottom);
 
-            if (!topPosition || !bottomPosition || !topAmount || !bottomAmount) continue;
+            if (!topPosition || !bottomPosition || !topAmount || !bottomAmount) {
+                continue;
+            }
 
             map.set(bottom, { position: topPosition.value, amount: parseInt(topAmount.value, 10) });
             map.set(top, { position: bottomPosition.value, amount: -parseInt(bottomAmount.value, 10) });
@@ -270,9 +280,11 @@ export function createLayout(props: { overlaps?: string[]; fullHeight?: boolean 
             const instances = findChildrenWithProvide(VuetifyLayoutItemKey, rootVm?.vnode);
             const instanceIndex = instances.indexOf(vm);
 
-            if (instanceIndex > -1) registered.value.splice(instanceIndex, 0, id);
-            else registered.value.push(id);
-
+            if (instanceIndex > -1) {
+                registered.value.splice(instanceIndex, 0, id);
+            } else {
+                registered.value.push(id);
+            }
             const index = computed(() => items.value.findIndex((i) => i.id === id));
             const zIndex = computed(() => rootZIndex.value + layers.value.length * 2 - index.value * 2);
 
@@ -291,11 +303,15 @@ export function createLayout(props: { overlaps?: string[]; fullHeight?: boolean 
                     ...(transitionsEnabled.value ? undefined : { transition: 'none' }),
                 } as const;
 
-                if (!isMounted.value) return styles;
+                if (!isMounted.value) {
+                    return styles;
+                }
 
                 const item = items.value[index.value];
 
-                if (!item) throw new Error(`[Vuetify] Could not find layout item "${id}"`);
+                if (!item) {
+                    throw new Error(`[Vuetify] Could not find layout item "${id}"`);
+                }
 
                 const overlap = computedOverlaps.value.get(id);
                 if (overlap) {
