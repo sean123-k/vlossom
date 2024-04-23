@@ -5,6 +5,7 @@ export * from './input-composable';
 export * from './input-form-composable';
 export * from './input-modifier-composable';
 export * from './input-option-composable';
+export * from './layout-composable';
 export * from './responsive-composable';
 export * from './style-set-composable';
 export * from './state-class-composable';

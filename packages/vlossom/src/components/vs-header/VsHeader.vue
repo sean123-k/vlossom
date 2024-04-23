@@ -1,7 +1,7 @@
 <template>
     <!--     // TODO class 추가 -->
     <vs-bar-node
-        :class="['vs-header', `vs-header-${position}`]"
+        :compoonentName="name"
         :color-scheme="computedColorScheme"
         :style-set="{ ...defaultInsetStyle, ...computedStyleSet }"
         :height="height"
@@ -53,6 +53,7 @@ export default defineComponent({
         });
 
         return {
+            name,
             computedColorScheme,
             computedStyleSet,
             defaultInsetStyle,

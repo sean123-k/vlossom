@@ -1,5 +1,5 @@
 <template>
-    <vs-app has-nav :is-nav-open="isOpen">
+    <vs-layout>
         <vs-header height="100px" position="fixed" color-scheme="red">
             <div class="header-content">
                 <button type="button" @click="open">
@@ -20,19 +20,17 @@
             </vs-main>
         </div>
         <vs-footer position="absolute" height="50px" color-scheme="blue">Footer</vs-footer>
-    </vs-app>
+    </vs-layout>
 </template>
 
 <script lang="ts">
 import { ref } from 'vue';
 import { defineComponent } from 'vue';
 import Navigation from './common/Navigation.vue';
-import VsApp from './VsApp.vue';
 
 export default defineComponent({
     components: {
         Navigation,
-        VsApp,
     },
     setup() {
         const isOpen = ref(true);

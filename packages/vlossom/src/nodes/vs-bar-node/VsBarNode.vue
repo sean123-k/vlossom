@@ -1,5 +1,6 @@
 <template>
-    <div :class="['vs-bar-node', `vs-${colorScheme}`, { ...classObj }]" :style="computedStyle">
+    {{ layoutStyle }}
+    <div :class="['vs-bar-node', `vs-${colorScheme}`, { ...classObj }]" :style="{ ...computedStyle, ...layoutStyle }">
         <div class="vs-bar-node-content">
             <slot />
         </div>
@@ -7,11 +8,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs, computed, type PropType } from 'vue';
+import { defineComponent, toRefs, computed, toRef, shallowRef, ref, type PropType } from 'vue';
+import { useLayoutItem } from '@/composables';
 import type { Align, ColorScheme, CssPosition } from '@/declaration';
 
 export default defineComponent({
     props: {
+        compoonentName: { type: String, required: true },
         colorScheme: { type: String as PropType<'default' | ColorScheme>, required: true },
         styleSet: { type: Object as PropType<{ [key: string]: any }>, default: () => ({}) },
         height: { type: String, default: '' },
@@ -20,7 +23,7 @@ export default defineComponent({
         verticalAlign: { type: String as PropType<Align>, default: '' },
     },
     setup(props) {
-        const { styleSet, height, position, primary, verticalAlign } = toRefs(props);
+        const { compoonentName, styleSet, height, position, primary, verticalAlign } = toRefs(props);
 
         const convertedStyleSet = computed(() => {
             return Object.entries(styleSet.value).reduce((acc, [key, value]) => {
@@ -54,8 +57,30 @@ export default defineComponent({
             return style;
         });
 
+        const layoutStyle = ref({});
+
+        const layoutPosition = compoonentName.value === 'VsHeader' ? 'top' : 'bottom';
+
+        const layoutOptions = useLayoutItem({
+            id: compoonentName.value,
+            position: toRef(layoutPosition),
+            layoutSize: computedStyle.value['--vs-bar-node-height'],
+            elementSize: shallowRef(undefined),
+            active: toRef(true),
+            absolute: toRef(computedStyle.value['--vs-bar-node-height'] === 'absolute'),
+        });
+
+        if (layoutOptions) {
+            // app bar
+            console.log(layoutOptions.layoutItemStyles.value);
+            layoutStyle.value = layoutOptions.layoutItemStyles.value;
+        } else {
+            // 일반 헤더
+        }
+
         return {
             computedStyle,
+            layoutStyle,
             classObj,
         };
     },
