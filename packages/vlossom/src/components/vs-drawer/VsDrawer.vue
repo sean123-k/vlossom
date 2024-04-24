@@ -31,8 +31,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, toRefs, watch, computed, type PropType } from 'vue';
-import { useColorScheme, useStyleSet } from '@/composables';
+import { defineComponent, ref, toRefs, watch, computed, toRef, type PropType } from 'vue';
+import { useColorScheme, useStyleSet, useLayoutItem } from '@/composables';
 import VsFocusTrap from '@/components/vs-focus-trap/VsFocusTrap.vue';
 import { VsDialogNode } from '@/nodes';
 import { VsComponent, Placement, Size, SIZES, type ColorScheme } from '@/declaration';
@@ -88,13 +88,6 @@ export default defineComponent({
             return {};
         });
 
-        const computedStyleSet = computed(() => {
-            return {
-                ...drawerStyleSet.value,
-                ...sizeStyleSet.value,
-            };
-        });
-
         const hasHeader = computed(() => !!slots['header']);
         const hasFooter = computed(() => !!slots['footer']);
 
@@ -123,6 +116,33 @@ export default defineComponent({
                 isOpen.value = false;
             }
         }
+
+        const layoutStyle = ref({});
+
+        const position = computed(() => (hasContainer.value ? 'absolute' : 'fixed'));
+        console.log(9999999999, placement.value, size.value);
+        const layoutOptions = useLayoutItem({
+            id: VsComponent.VsDrawer,
+            placement,
+            height: isOpen.value && (placement.value === 'top' || placement.value === 'bottom') ? size.value : 0,
+            width: isOpen.value && (placement.value === 'left' || placement.value === 'right') ? size.value : 0,
+            position,
+        });
+
+        if (layoutOptions) {
+            // app bar
+            console.log('VsDrawer', layoutOptions.layoutItemStyles.value);
+            layoutStyle.value = layoutOptions.layoutItemStyles.value;
+        } else {
+            // 일반 헤더
+        }
+
+        const computedStyleSet = computed(() => {
+            return {
+                ...drawerStyleSet.value,
+                ...sizeStyleSet.value,
+            };
+        });
 
         return {
             computedColorScheme,

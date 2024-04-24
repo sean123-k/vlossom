@@ -1,6 +1,5 @@
 <template>
-    {{ layoutStyle }}
-    <div :class="['vs-bar-node', `vs-${colorScheme}`, { ...classObj }]" :style="{ ...computedStyle, ...layoutStyle }">
+    <div :class="['vs-bar-node', `vs-${colorScheme}`, { ...classObj }]" :style="computedStyle">
         <div class="vs-bar-node-content">
             <slot />
         </div>
@@ -8,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs, computed, toRef, shallowRef, ref, type PropType } from 'vue';
+import { defineComponent, toRefs, computed, toRef, ref, type PropType } from 'vue';
 import { useLayoutItem } from '@/composables';
 import type { Align, ColorScheme, CssPosition } from '@/declaration';
 
@@ -37,6 +36,26 @@ export default defineComponent({
             primary: primary.value,
         }));
 
+        const layoutStyle = ref({});
+
+        const layoutPosition = compoonentName.value === 'VsHeader' ? 'top' : 'bottom';
+
+        // TODO: parseUnit
+        const layoutOptions = useLayoutItem({
+            id: compoonentName.value,
+            placement: toRef(layoutPosition),
+            height: isNaN(Number(height.value)) ? Number(height.value.split('px')[0]) : Number(height.value),
+            position,
+        });
+
+        if (layoutOptions) {
+            // app bar
+            console.log(compoonentName.value, layoutOptions.layoutItemStyles.value);
+            layoutStyle.value = layoutOptions.layoutItemStyles.value;
+        } else {
+            // 일반 헤더
+        }
+
         const computedStyle = computed(() => {
             const style = { ...convertedStyleSet.value };
             if (height.value) {
@@ -57,30 +76,8 @@ export default defineComponent({
             return style;
         });
 
-        const layoutStyle = ref({});
-
-        const layoutPosition = compoonentName.value === 'VsHeader' ? 'top' : 'bottom';
-
-        const layoutOptions = useLayoutItem({
-            id: compoonentName.value,
-            position: toRef(layoutPosition),
-            layoutSize: computedStyle.value['--vs-bar-node-height'],
-            elementSize: shallowRef(undefined),
-            active: toRef(true),
-            absolute: toRef(computedStyle.value['--vs-bar-node-height'] === 'absolute'),
-        });
-
-        if (layoutOptions) {
-            // app bar
-            console.log(layoutOptions.layoutItemStyles.value);
-            layoutStyle.value = layoutOptions.layoutItemStyles.value;
-        } else {
-            // 일반 헤더
-        }
-
         return {
             computedStyle,
-            layoutStyle,
             classObj,
         };
     },

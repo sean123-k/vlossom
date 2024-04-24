@@ -15,7 +15,7 @@ import {
     ComponentInternalInstance,
     onMounted,
 } from 'vue';
-import { Placement } from '@/declaration';
+import { Placement, VsComponent } from '@/declaration';
 
 const ROOT_ZINDEX = 1000;
 
@@ -66,12 +66,10 @@ export function findChildrenWithProvide(
 
 export function useLayoutItem(options: {
     id: string | undefined;
-    position: Ref<Placement>;
-    layoutSize: Ref<number | string>;
-    elementSize: Ref<number | string | undefined>;
-    active: Ref<boolean>;
-    disableTransitions?: Ref<boolean>;
-    absolute: Ref<boolean | undefined>;
+    placement?: Ref<Position>;
+    height?: Ref<number | string>;
+    width?: Ref<number | string>;
+    position?: Ref<Placement>;
 }) {
     const layout = inject(LayoutKey);
     if (!layout) {
@@ -85,13 +83,8 @@ export function useLayoutItem(options: {
 
     provide(LayoutItemKey, { id });
 
-    const isKeptAlive = shallowRef(false);
-    onDeactivated(() => (isKeptAlive.value = true));
-    onActivated(() => (isKeptAlive.value = false));
-
     const { layoutItemStyles, layoutItemScrimStyles } = layout.register(vm, {
         ...options,
-        active: computed(() => (isKeptAlive.value ? false : options.active.value)),
         id,
     });
 
@@ -177,11 +170,21 @@ export function createLayout() {
         isMounted.value = true;
     });
 
+    const layoutStyles: Ref<{ [key: string]: any }> = ref({
+        paddingTop: 0,
+        paddingBottom: 0,
+        paddingLeft: 0,
+        paddingRight: 0,
+    });
+
+    const drawerOptions: Ref<{ [key: string]: any }> = ref({
+        placement: '',
+        size: 0,
+    });
+
     provide(LayoutKey, {
-        register: (vm: ComponentInternalInstance, { id, position, layoutSize, elementSize, active, absolute }) => {
+        register: (vm: ComponentInternalInstance, { id, placement, height, width, position }) => {
             positions.set(id, position);
-            layoutSizes.set(id, layoutSize);
-            activeItems.set(id, active);
 
             const instances = findChildrenWithProvide(LayoutItemKey, rootVm?.vnode);
             const instanceIndex = instances.indexOf(vm);
@@ -192,57 +195,70 @@ export function createLayout() {
                 registered.value.push(id);
             }
 
-            // const index = computed(() => items.value.findIndex((i) => i.id === id));
-            const index = computed(() => 0);
-
-            const layoutItemStyles = computed(() => {
-                const isHorizontal = position.value === 'left' || position.value === 'right';
-                const isOppositeHorizontal = position.value === 'right';
-                const isOppositeVertical = position.value === 'bottom';
-
-                const styles = {
-                    [position.value]: 0,
-                    // zIndex: zIndex.value,
-                    transform: `translate${isHorizontal ? 'X' : 'Y'}(${
-                        (active.value ? 0 : -110) * (isOppositeHorizontal || isOppositeVertical ? -1 : 1)
-                    }%)`,
-
-                    position: absolute.value || rootZIndex.value !== ROOT_ZINDEX ? 'absolute' : 'fixed',
-                } as const;
-
-                if (!isMounted.value) {
-                    return styles;
-                }
-
-                const item = items.value[index.value];
-
-                if (!item) {
-                    throw new Error(`[Vlossom] Could not find layout item "${id}"`);
-                }
-
-                return {
-                    ...styles,
-                    height: isHorizontal
-                        ? `calc(100% - ${item.top}px - ${item.bottom}px)`
-                        : elementSize.value
-                        ? `${elementSize.value}px`
-                        : undefined,
-                    left: isOppositeHorizontal ? undefined : `${item.left}px`,
-                    right: isOppositeHorizontal ? `${item.right}px` : undefined,
-                    top: position.value !== 'bottom' ? `${item.top}px` : undefined,
-                    bottom: position.value !== 'top' ? `${item.bottom}px` : undefined,
-                    width: !isHorizontal
-                        ? `calc(100% - ${item.left}px - ${item.right}px)`
-                        : elementSize.value
-                        ? `${elementSize.value}px`
-                        : undefined,
-                };
+            const layoutItemStyles: Ref<{ [key: string]: any }> = ref({
+                // [placement.value]: 0,
+                // height: height + 'px',
+                // width: width + 'px',
+                // position: position.value,
             });
+
+            if (id === VsComponent.VsHeader) {
+                console.log('registering', id, layoutStyles.value);
+                if (position.value === 'fixed' || position.value === 'absolute') {
+                    layoutStyles.value.paddingTop += Math.max(height, 50);
+                    layoutStyles.value.paddingTop += 'px';
+                }
+            }
+
+            if (id === VsComponent.VsFooter) {
+                if (position.value === 'fixed' || position.value === 'absolute') {
+                    layoutStyles.value.paddingBottom += Math.max(height, 50);
+                    layoutStyles.value.paddingBottom += 'px';
+                }
+            }
+
+            if (id === VsComponent.VsDrawer) {
+                drawerOptions.value.placement = placement.value;
+                console.log(111111, id, placement.value, height, width, position.value);
+                if (placement.value === 'top' || placement.value === 'bottom') {
+                    drawerOptions.value.size = height.value;
+                }
+                if (placement.value === 'left' || placement.value === 'right') {
+                    drawerOptions.value.size = width.value;
+                }
+            }
+
+            if (id === VsComponent.VsMain) {
+                console.log(222222, drawerOptions.value);
+                if (drawerOptions.value.placement === 'top') {
+                    layoutItemStyles.value.paddingTop += drawerOptions.value.size;
+                    layoutItemStyles.value.paddingTop += 'px';
+                }
+
+                if (drawerOptions.value.placement === 'bottom') {
+                    layoutItemStyles.value.paddingBottom += drawerOptions.value.size;
+                    layoutItemStyles.value.paddingBottom += 'px';
+                }
+
+                if (drawerOptions.value.placement === 'left') {
+                    layoutItemStyles.value.paddingLeft += drawerOptions.value.size;
+                    layoutItemStyles.value.paddingLeft += 'px';
+                }
+
+                if (drawerOptions.value.placement === 'right') {
+                    layoutItemStyles.value.paddingRight += drawerOptions.value.size;
+                    layoutItemStyles.value.paddingRight += 'px';
+                }
+            }
+
+            console.log('registered', id, layoutStyles.value);
 
             return { layoutItemStyles };
         },
         unregister: () => {},
     });
 
-    return {};
+    return {
+        layoutStyles,
+    };
 }
