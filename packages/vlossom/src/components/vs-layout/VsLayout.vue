@@ -5,13 +5,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { createLayout } from '@/composables';
+import { defineComponent, ref } from 'vue';
+import { useLayout } from '@/composables';
 
 export default defineComponent({
     name: 'VsLayout',
     setup() {
-        const { layoutStyles } = createLayout();
+        const navOn = ref(false);
+        const { layoutStyles } = useLayout().createLayout(navOn);
 
         return { layoutStyles };
     },

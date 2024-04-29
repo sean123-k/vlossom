@@ -7,7 +7,7 @@
 <script lang="ts">
 import { defineComponent, ref, toRef } from 'vue';
 import { VsComponent } from '@/declaration';
-import { useLayoutItem } from '@/composables';
+import { useLayout } from '@/composables';
 
 const name = VsComponent.VsMain;
 export default defineComponent({
@@ -15,7 +15,7 @@ export default defineComponent({
     setup() {
         const layoutStyle = ref({});
 
-        const layoutOptions = useLayoutItem({
+        const layoutOptions = useLayout().useLayoutItem({
             id: VsComponent.VsMain,
             placement: toRef('top'),
             position: toRef('relative'),

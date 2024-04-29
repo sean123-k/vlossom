@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { defineComponent, toRefs, computed, toRef, ref, type PropType } from 'vue';
-import { useLayoutItem } from '@/composables';
+import { useLayout } from '@/composables';
 import type { Align, ColorScheme, CssPosition } from '@/declaration';
 
 export default defineComponent({
@@ -41,7 +41,7 @@ export default defineComponent({
         const layoutPosition = compoonentName.value === 'VsHeader' ? 'top' : 'bottom';
 
         // TODO: parseUnit
-        const layoutOptions = useLayoutItem({
+        const layoutOptions = useLayout().useLayoutItem({
             id: compoonentName.value,
             placement: toRef(layoutPosition),
             height: isNaN(Number(height.value)) ? Number(height.value.split('px')[0]) : Number(height.value),
