@@ -13,7 +13,7 @@ $fontWeight: var(--vs-tabs-fontWeight, 400);
         overflow-x: hidden;
 
         &.bottomLine {
-            border-bottom: 1px solid var(--vs-tabs-borderBottomColor, var(--vs-comp-border-color));
+            border-bottom: 1px solid var(--vs-tabs-borderBottomColor, var(--vs-line-color));
         }
 
         &.scrollable {
@@ -27,7 +27,7 @@ $fontWeight: var(--vs-tabs-fontWeight, 400);
         .tab {
             align-items: center;
             background: transparent;
-            color: var(--vs-tabs-fontColor, var(--vs-comp-color));
+            color: var(--vs-tabs-fontColor, var(--vs-comp-bg));
             cursor: pointer;
             display: inline-flex;
             font-size: var(--vs-tabs-fontSize, 1rem);
@@ -45,7 +45,7 @@ $fontWeight: var(--vs-tabs-fontWeight, 400);
             }
 
             &:hover {
-                background-color: var(--vs-tabs-backgroundColor, var(--vs-light-backgroundColor));
+                background-color: var(--vs-tabs-backgroundColor, var(--vs-no-color));
             }
 
             &:focus {
@@ -53,7 +53,7 @@ $fontWeight: var(--vs-tabs-fontWeight, 400);
             }
 
             &.primary {
-                border-bottom: 2px solid var(--vs-tabs-backgroundColor, var(--vs-comp-backgroundColor-primary));
+                border-bottom: 2px solid var(--vs-tabs-backgroundColor, var(--vs-comp-bg-primary));
                 font-weight: calc($fontWeight + 200);
             }
 
@@ -71,7 +71,7 @@ $fontWeight: var(--vs-tabs-fontWeight, 400);
 
     .scroll-button {
         width: 1rem;
-        color: var(--vs-comp-color);
+        color: var(--vs-comp-bg);
 
         &.scroll-left-button {
             margin-right: 0.5rem;
