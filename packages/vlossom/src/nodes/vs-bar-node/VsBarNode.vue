@@ -7,9 +7,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs, computed, toRef, ref, type PropType } from 'vue';
-import { useLayout } from '@/composables';
+import { defineComponent, toRefs, computed, inject, watch, type PropType } from 'vue';
 import type { Align, ColorScheme, CssPosition } from '@/declaration';
+import { LayoutAttrs } from '@/components/vs-layout/VsLayout.vue';
 
 export default defineComponent({
     props: {
@@ -36,26 +36,6 @@ export default defineComponent({
             primary: primary.value,
         }));
 
-        const layoutStyle = ref({});
-
-        const layoutPosition = compoonentName.value === 'VsHeader' ? 'top' : 'bottom';
-
-        // TODO: parseUnit
-        const layoutOptions = useLayout().useLayoutItem({
-            id: compoonentName.value,
-            placement: toRef(layoutPosition),
-            height: isNaN(Number(height.value)) ? Number(height.value.split('px')[0]) : Number(height.value),
-            position,
-        });
-
-        if (layoutOptions) {
-            // app bar
-            console.log(compoonentName.value, layoutOptions.layoutItemStyles.value);
-            layoutStyle.value = layoutOptions.layoutItemStyles.value;
-        } else {
-            // 일반 헤더
-        }
-
         const computedStyle = computed(() => {
             const style = { ...convertedStyleSet.value };
             if (height.value) {
@@ -75,6 +55,29 @@ export default defineComponent({
 
             return style;
         });
+
+        const layoutAttrs: LayoutAttrs | undefined = inject('layoutAttrs');
+
+        watch(
+            computedStyle,
+            (style) => {
+                if (!layoutAttrs) {
+                    return;
+                }
+                if (compoonentName.value === 'VsHeader') {
+                    layoutAttrs.header = {
+                        position: style['--vs-bar-node-position'] || 'static',
+                        height: style['--vs-bar-node-height'] || 'auto',
+                    };
+                } else if (compoonentName.value === 'VsFooter') {
+                    layoutAttrs.footer = {
+                        position: style['--vs-bar-node-position'] || 'static',
+                        height: style['--vs-bar-node-height'] || 'auto',
+                    };
+                }
+            },
+            { immediate: true, deep: true },
+        );
 
         return {
             computedStyle,

@@ -31,14 +31,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, toRefs, watch, computed, toRef, type PropType } from 'vue';
-import { useColorScheme, useStyleSet, useLayout } from '@/composables';
+import { defineComponent, ref, toRefs, watch, computed, watchEffect, type PropType } from 'vue';
+import { useColorScheme, useStyleSet } from '@/composables';
 import VsFocusTrap from '@/components/vs-focus-trap/VsFocusTrap.vue';
 import { VsDialogNode } from '@/nodes';
 import { VsComponent, Placement, Size, SIZES, type ColorScheme } from '@/declaration';
 import { propValidationUtil } from '@/utils/prop-validation';
 
 import type { VsDrawerStyleSet } from './types';
+import { inject } from 'vue';
+import { LayoutAttrs } from '../vs-layout/VsLayout.vue';
 
 const name = VsComponent.VsDrawer;
 
@@ -98,30 +100,25 @@ export default defineComponent({
         const hasHeader = computed(() => !!slots['header']);
         const hasFooter = computed(() => !!slots['footer']);
 
-        const layoutStyle = ref({});
+        const navOn = inject('navOn');
+        const layoutAttrs: LayoutAttrs | undefined = inject('layoutAttrs');
 
-        const position = computed(() => (hasContainer.value ? 'absolute' : 'fixed'));
-        const layoutOptions = useLayout().useLayoutItem({
-            id: VsComponent.VsDrawer,
-            placement,
-            // height: isOpen.value && (placement.value === 'top' || placement.value === 'bottom') ? size.value : 0,
-            // width: isOpen.value && (placement.value === 'left' || placement.value === 'right') ? size.value : 0,
-            position,
-        });
+        watch(
+            computedStyleSet,
+            () => {
+                if (!layoutAttrs) {
+                    return;
+                }
 
-        if (layoutOptions) {
-            console.log('vsdrawer layoutOptions', layoutOptions);
-            console.log('VsDrawer', layoutOptions.layoutItemStyles.value);
-            layoutStyle.value = layoutOptions.layoutItemStyles.value;
-        } else {
-            // 일반 헤더
-        }
+                layoutAttrs.drawer = {
+                    placement: placement.value,
+                    size: size.value,
+                };
+            },
+            { immediate: true, deep: true },
+        );
 
         const isOpen = ref(modelValue.value);
-
-        watch(layoutOptions?.navOn, () => {
-            isOpen.value = layoutOptions?.navOn.value;
-        });
 
         watch(modelValue, (val) => {
             isOpen.value = val;
@@ -139,6 +136,12 @@ export default defineComponent({
             }
 
             emit('update:modelValue', val);
+        });
+
+        watchEffect(() => {
+            if (typeof navOn === 'object' && navOn !== null && 'value' in navOn) {
+                navOn.value = isOpen.value;
+            }
         });
 
         function clickDimmed() {

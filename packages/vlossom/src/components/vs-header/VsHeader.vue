@@ -1,5 +1,4 @@
 <template>
-    <!--     // TODO class 추가 -->
     <vs-bar-node
         :compoonentName="name"
         :color-scheme="computedColorScheme"
