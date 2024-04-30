@@ -16,7 +16,7 @@
                     v-for="(tab, index) in tabs"
                     ref="tabRefs"
                     :key="tab"
-                    :class="['tab', { primary: isSelected(index), disabled: isDisabled(index) }]"
+                    :class="['tab', { selected: isSelected(index), disabled: isDisabled(index) }]"
                     role="tab"
                     :aria-selected="isSelected(index)"
                     :aria-disabled="isDisabled(index)"
@@ -66,7 +66,7 @@ export default defineComponent({
         bottomLine: { type: Boolean, default: true },
         dense: { type: Boolean, default: false },
         disabled: { type: Array as PropType<number[]>, default: () => [] },
-        scrollable: { type: Boolean, default: false },
+        scrollable: { type: Boolean, default: true },
         scrollButtons: {
             type: [Boolean, String] as PropType<ScrollButton>,
             default: false,
