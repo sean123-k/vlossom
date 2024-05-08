@@ -6,8 +6,11 @@ export function useStateClass(state: Ref<UIState>) {
 
     const textGlowByState = computed(() => `vs-text-glow-${state.value}`);
 
+    const iconGlowByState = computed(() => `vs-icon-glow-${state.value}`);
+
     return {
         boxGlowByState,
         textGlowByState,
+        iconGlowByState,
     };
 }

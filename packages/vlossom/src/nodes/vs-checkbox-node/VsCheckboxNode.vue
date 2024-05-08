@@ -1,10 +1,10 @@
 <template>
     <div :class="['vs-checkbox-node', `vs-${colorScheme}`, { ...classObj }]" :style="styleSet">
         <div class="checkbox-wrap">
-            <vs-icon class="check-icon" :icon="icon" />
+            <vs-icon :class="['check-icon', iconGlowByState]" :icon="icon" />
             <input
                 type="checkbox"
-                :class="['checkbox-input', boxGlowByState]"
+                class="checkbox-input"
                 :aria-label="ariaLabel"
                 :id="id"
                 :disabled="disabled || readonly"
@@ -52,7 +52,7 @@ export default defineComponent({
     setup(props, { emit }) {
         const { checked, indeterminate, disabled, readonly, state } = toRefs(props);
 
-        const { boxGlowByState, textGlowByState } = useStateClass(state);
+        const { iconGlowByState, textGlowByState } = useStateClass(state);
 
         const classObj = computed(() => ({
             checked: checked.value,
@@ -92,7 +92,7 @@ export default defineComponent({
             onFocus,
             onBlur,
             convertToString: utils.string.convertToString,
-            boxGlowByState,
+            iconGlowByState,
             textGlowByState,
         };
     },
