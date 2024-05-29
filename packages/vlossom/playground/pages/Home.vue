@@ -3,7 +3,7 @@
         <!--  TODO: section styleset에 height 지정할지 고민 -->
         <!-- TODO: section overflow:auto 추가 -->
         <vs-section color-scheme="green">
-            <h1 v-for="index in 50" style="background-color: beige">{{ LOREM_IPSUM }}</h1>
+            <h1 v-for="index in 50" :key="index">{{ LOREM_IPSUM }}</h1>
         </vs-section>
     </vs-page>
 </template>

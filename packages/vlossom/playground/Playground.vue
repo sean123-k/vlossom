@@ -7,13 +7,15 @@
             :dimmed="true"
             :closeOnDimmedClick="true"
             position="fixed"
-            style="margin-top: 100px"
+            style="margin-top: 70px"
+            size="300px"
+            :style-set="{ padding: '10' }"
         >
             <navigation @close="close" />
         </vs-drawer>
 
         <vs-container>
-            <vs-header height="100px" position="fixed" color-scheme="red">
+            <vs-header height="70px" position="fixed" color-scheme="red">
                 <div class="header-content">
                     <button type="button" @click="isOpen = !isOpen">
                         <!-- <vs-icon icon="goNext" size="20px" /> -->
@@ -62,23 +64,4 @@ export default defineComponent({
     align-items: center;
     padding: 0 1.2rem;
 }
-
-.close-button {
-    padding: 1.2rem;
-}
-
-.menu-item {
-    padding: 1.2rem 2rem;
-    width: 100%;
-    cursor: pointer;
-    &:hover {
-        background-color: #f0f0f0;
-    }
-}
-
-// .drawer-container {
-//     position: relative;
-//     height: 100vh;
-//     margin-top: 50px;
-// }
 </style>
