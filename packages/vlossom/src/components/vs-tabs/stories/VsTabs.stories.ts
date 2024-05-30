@@ -97,7 +97,7 @@ export const Width: Story = {
         `,
     }),
     args: {
-        width: { md: '100%', lg: '50%' },
+        width: { md: '100%', lg: 0 },
     },
 };
 

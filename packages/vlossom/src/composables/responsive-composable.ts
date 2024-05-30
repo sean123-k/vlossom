@@ -5,12 +5,23 @@ import type { Breakpoints } from '@/declaration';
 
 export function getResponsiveProps() {
     return {
-        width: { type: [String, Object] as PropType<string | Breakpoints>, default: null },
-        grid: { type: Object as PropType<Breakpoints>, default: () => ({}) },
+        width: { type: [String, Number, Object] as PropType<string | number | Breakpoints>, default: null },
+        grid: { type: [String, Number, Object] as PropType<string | number | Breakpoints>, default: null },
     };
 }
 
-export function useResponsive(width: Ref<string | Breakpoints | null>, grid: Ref<Breakpoints>) {
+function convertSize(width: string | number) {
+    if (isNaN(Number(width)) && typeof width === 'string') {
+        return width;
+    } else {
+        return `${width || 0}px`;
+    }
+}
+
+export function useResponsive(
+    width: Ref<string | number | Breakpoints | null>,
+    grid: Ref<string | number | Breakpoints | null>,
+) {
     const responsiveClasses: ComputedRef<string[]> = computed(() => {
         const classes: string[] = ['vs-responsive'];
 
@@ -25,44 +36,61 @@ export function useResponsive(width: Ref<string | Breakpoints | null>, grid: Ref
             classes.push(...widthClasses);
         }
 
-        const { sm, md, lg, xl } = grid.value;
-        const gridClasses = [
-            ...(sm ? ['vs-grid-sm'] : []),
-            ...(md ? ['vs-grid-md'] : []),
-            ...(lg ? ['vs-grid-lg'] : []),
-            ...(xl ? ['vs-grid-xl'] : []),
-        ];
-        classes.push(...gridClasses);
+        if (grid.value && utils.object.isPlainObject(grid.value)) {
+            const { sm, md, lg, xl } = grid.value;
+            const gridClasses = [
+                ...(sm ? ['vs-grid-sm'] : []),
+                ...(md ? ['vs-grid-md'] : []),
+                ...(lg ? ['vs-grid-lg'] : []),
+                ...(xl ? ['vs-grid-xl'] : []),
+            ];
+            classes.push(...gridClasses);
+        }
 
         return classes;
     });
 
     const responsiveStyles: ComputedRef<Record<string, string>> = computed(() => {
         const styles: Record<string, string> = {};
+        if (width.value !== undefined && width.value !== null) {
+            if (utils.object.isPlainObject(width.value)) {
+                const { base, sm, md, lg, xl } = width.value;
+                const widthStyles = {
+                    //  TODO: 0px 지정 안되는 이슈
+                    ...(base !== undefined && base !== null && { ['--vs-width-base']: convertSize(base) }),
+                    ...(sm !== undefined && base !== null && { ['--vs-width-sm']: convertSize(sm) }),
+                    ...(md !== undefined && base !== null && { ['--vs-width-md']: convertSize(md) }),
+                    ...(lg !== undefined && base !== null && { ['--vs-width-lg']: convertSize(lg) }),
+                    ...(xl !== undefined && base !== null && { ['--vs-width-xl']: convertSize(xl) }),
+                };
 
-        if (width.value && utils.object.isPlainObject(width.value)) {
-            const { base, sm, md, lg, xl } = width.value;
-            const widthStyles = {
-                ...(base && { ['--vs-width-base']: base?.toString() }),
-                ...(sm && { ['--vs-width-sm']: sm?.toString() }),
-                ...(md && { ['--vs-width-md']: md?.toString() }),
-                ...(lg && { ['--vs-width-lg']: lg?.toString() }),
-                ...(xl && { ['--vs-width-xl']: xl?.toString() }),
-            };
-            Object.assign(styles, widthStyles);
-        } else if (typeof width.value === 'string') {
-            styles['width'] = width.value;
+                Object.assign(styles, widthStyles);
+                console.log('width', styles);
+            } else {
+                styles['width'] = convertSize(width.value);
+            }
         }
 
-        const { base, sm, md, lg, xl } = grid.value;
-        const gridStyles = {
-            ...(base && { ['--vs-grid-base']: base?.toString() }),
-            ...(sm && { ['--vs-grid-sm']: sm?.toString() }),
-            ...(md && { ['--vs-grid-md']: md?.toString() }),
-            ...(lg && { ['--vs-grid-lg']: lg?.toString() }),
-            ...(xl && { ['--vs-grid-xl']: xl?.toString() }),
-        };
-        Object.assign(styles, gridStyles);
+        if (grid.value !== undefined && grid.value !== null) {
+            if (utils.object.isPlainObject(grid.value)) {
+                const { base, sm, md, lg, xl } = grid.value;
+                //  TODO: grid 속성 반영 안되는 이슈
+                const gridStyles = {
+                    ...(base !== undefined && base !== null && { ['--vs-grid-base']: base?.toString() }),
+                    ...(sm !== undefined && base !== null && { ['--vs-grid-sm']: sm?.toString() }),
+                    ...(md !== undefined && base !== null && { ['--vs-grid-md']: md?.toString() }),
+                    ...(lg !== undefined && base !== null && { ['--vs-grid-lg']: lg?.toString() }),
+                    ...(xl !== undefined && base !== null && { ['--vs-grid-xl']: xl?.toString() }),
+                };
+                Object.assign(styles, gridStyles);
+                console.log('grid', styles);
+            } else {
+                const gridStyles = {
+                    '--vs-grid-base': grid.value?.toString(),
+                };
+                Object.assign(styles, gridStyles);
+            }
+        }
 
         return styles;
     });

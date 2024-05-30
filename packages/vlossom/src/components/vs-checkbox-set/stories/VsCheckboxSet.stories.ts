@@ -129,7 +129,7 @@ export const Width: Story = {
         `,
     }),
     args: {
-        width: { md: '300px', lg: '400px' },
+        width: { md: '100px', lg: '4px' },
     },
 };
 
