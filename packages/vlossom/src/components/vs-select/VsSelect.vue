@@ -64,7 +64,7 @@
                     aria-controls="vs-select-options"
                     :aria-autocomplete="autocomplete ? 'list' : undefined"
                     :aria-activedescendant="focusedOptionId"
-                    :class="{ autocomplete: autocomplete }"
+                    :class="{ autocomplete }"
                     :disabled="disabled"
                     :placeholder="placeholder"
                     :readonly="readonly || !autocomplete"
@@ -363,12 +363,28 @@ export default defineComponent({
         const { isOpen, isClosing, toggleOptions, closeOptions, triggerRef, optionsRef, isVisible, computedPlacement } =
             useToggleOptions(disabled, readonly);
 
+        const inputLabel = computed(() => {
+            if (autocompleteText.value) {
+                return autocompleteText.value;
+            }
+
+            if (focusing.value && autocomplete.value) {
+                return autocompleteText.value;
+            }
+
+            if (multiple.value) {
+                return '';
+            }
+
+            return selectedOptions.value[0] ? getOptionLabel(selectedOptions.value[0].value) : '';
+        });
+
         const { autocompleteText, filteredOptions, updateAutocompleteText } = useAutocomplete(
             autocomplete,
             computedOptions,
             getOptionLabel,
             isOpen,
-            select,
+            // select,
         );
 
         const { listboxRef, loadedOptions } = useInfiniteScroll(filteredOptions, lazyLoadNum, isOpen);
@@ -450,25 +466,20 @@ export default defineComponent({
 
         function onFocus(e: FocusEvent) {
             focusing.value = true;
+            // if (autocomplete.value) {
+            // select();
+            // }
             emit('focus', e);
         }
 
         function onBlur(e: FocusEvent) {
             focusing.value = false;
+            autocompleteText.value = inputLabel.value;
+
+            //  TODO: 확인
+            filteredOptions.value = [...computedOptions.value];
             emit('blur', e);
         }
-
-        const inputLabel = computed(() => {
-            if (focusing.value && autocomplete.value) {
-                return autocompleteText.value;
-            }
-
-            if (multiple.value) {
-                return '';
-            }
-
-            return selectedOptions.value[0] ? getOptionLabel(selectedOptions.value[0].value) : '';
-        });
 
         const animationClass = computed(() => {
             if (isOpen.value) {

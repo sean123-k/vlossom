@@ -1,4 +1,9 @@
-import { ref, watch, nextTick, type Ref } from 'vue';
+import {
+    ref,
+    watch,
+    // nextTick,
+    type Ref,
+} from 'vue';
 import { utils } from '@/utils';
 
 export function useAutocomplete(
@@ -6,7 +11,7 @@ export function useAutocomplete(
     computedOptions: Ref<{ id: string; value: any }[]>,
     getOptionLabel: (option: any) => string,
     isOpen: Ref<boolean>,
-    inputSelect: () => void,
+    // inputSelect: () => void,
 ) {
     const autocompleteText = ref('');
     const filteredOptions: Ref<{ id: string; value: any }[]> = ref([...computedOptions.value]);
@@ -24,14 +29,19 @@ export function useAutocomplete(
                 const label = getOptionLabel(option.value);
                 return label.toLowerCase().includes(lower);
             });
+
+            if (!isOpen.value) {
+                isOpen.value = true;
+            }
         }, 300),
     );
 
+    // TODO: 불필요한지 확인 후 제거
     watch(isOpen, () => {
         if (isOpen.value && autocomplete.value) {
-            nextTick(() => {
-                inputSelect();
-            });
+            // nextTick(() => {
+            //     inputSelect();
+            // });
         }
     });
 
